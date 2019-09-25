@@ -11,6 +11,8 @@ psycopg2 = "*"
 django-tables2 = "*"
 gunicorn = "*"
 django-heroku = "*"
+python-dotenv = "*"
+whitenoise = "*"
 
 [requires]
 python_version = "3.7"
