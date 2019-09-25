@@ -1,0 +1,29 @@
+h1 {
+    font-size:1.5em;
+}
+
+h2.type {
+    text-transform:uppercase;
+    font-size:.9em;
+    color:#888;
+}
+
+.facility-header, .facility-details {
+    border-bottom:1px solid #d3d3d3;
+    padding:10px 0 10px 0;
+    margin-bottom: 10px;
+}
+
+.data-header {
+    font-size:.9em;
+    text-transform:uppercase;
+    color:#888;
+}
+
+.data-container {
+    padding-bottom: 5px;
+}
+
+.facility-complaints {
+    padding-top:15px;
+}
