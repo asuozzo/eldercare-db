@@ -1,0 +1,10 @@
+{% extends 'eldercare/base.html' %}
+{% load render_table from django_tables2 %}
+
+{% block header %}
+  <h1>{% block title %}Home{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+{% render_table table %}
+{% endblock %}
