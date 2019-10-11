@@ -7,7 +7,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print("Loading CSV")
-        csv_path = "static/Inspections.csv"
+        csv_path = "static/inspections.csv"
         csv_file = open(csv_path, 'r')
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:

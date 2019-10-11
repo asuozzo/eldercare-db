@@ -6,7 +6,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print("Loading CSV")
-        csv_path = "static/Facilities.csv"
+        csv_path = "static/facilities.csv"
         csv_file = open(csv_path, 'r')
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
@@ -20,7 +20,7 @@ class Command(BaseCommand):
                     care_type=get_care_type(row['Type']),
                     id_num=row["ID"],
                     capacity=get_capacity(row["RCF - Capacity"], row["ALR - Max Occupancy"]),
-                    level=get_level(row["RCF - Level"]),
+                    level=row["RCF - Level"],
                     address=row["Address"],
                     town=row["Town"],
                     county=row["County"]
