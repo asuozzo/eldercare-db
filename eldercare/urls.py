@@ -1,8 +1,12 @@
 from django.urls import path
+from django.views.generic import TemplateView
 
-from . import views
+from eldercare.views import (
+    FacilityListView,
+    FacilityDetailView
+)
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('<int:facility_id>/', views.facility_detail, name="facility_detail")
+    path('', FacilityListView.as_view(), name='index'),
+    path('<int:pk>/', FacilityDetailView.as_view(), name='detail')
 ]

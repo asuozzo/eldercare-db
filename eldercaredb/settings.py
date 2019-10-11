@@ -11,15 +11,9 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-import django_heroku
-import dotenv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-dotenv_file = os.path.join(BASE_DIR, ".env")
-if os.path.isfile(dotenv_file):
-        dotenv.load_dotenv(dotenv_file)
 
 
 # Quick-start development settings - unsuitable for production
@@ -31,7 +25,7 @@ SECRET_KEY = '(4_v#v4hvg^$^*e2f5u&c0#)blu54a5r&_to^h2a63j##jj99+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['eldercare-vt.appspot.com','localhost']
 
 
 # Application definition
@@ -44,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_tables2'
+    'django_tables2',
+    'django.contrib.humanize',
+    'bakery'
 ]
 
 MIDDLEWARE = [
@@ -63,7 +59,9 @@ ROOT_URLCONF = 'eldercaredb.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,17 +80,26 @@ WSGI_APPLICATION = 'eldercaredb.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'eldercare',
-            'USER': 'eldercare',
-            'PASSWORD': 'eldercare',
-            'HOST': '127.0.0.1',
-            'PORT': '5432',
-        }
-    }
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+        'NAME': 'eldercare',
+        'USER': 'eldercare',
+        'PASSWORD': 'eldercare',
+    }
+}
+
+# Bakery config
+
+BUILD_DIR = os.path.join(BASE_DIR, "build")
+
+BAKERY_VIEWS = (
+    'eldercare.views.FacilityListView',
+    'eldercare.views.FacilityDetailView'
+)
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -140,7 +147,3 @@ STATICFILES_DIRS = []
 # https://warehouse.python.org/project/whitenoise/
 
 # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-
-
-django_heroku.settings(locals())
