@@ -10,9 +10,8 @@ django = "*"
 psycopg2 = "*"
 django-tables2 = "*"
 gunicorn = "*"
-django-heroku = "*"
-python-dotenv = "*"
 whitenoise = "*"
+django-bakery = "*"
 
 [requires]
 python_version = "3.7"
