@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.urls import reverse
 
 # Create your models here.
 class Facility(models.Model):
@@ -8,14 +8,8 @@ class Facility(models.Model):
         verbose_name_plural = "facilities"
 
     name = models.CharField(max_length=200)
-
-    TYPE_CHOICES = (
-        ("RCF","Residential Care Facility"),
-        ("ALR","Assisted Living Residence")
-    )
     care_type = models.CharField(
-        max_length=100,
-        choices=TYPE_CHOICES
+        max_length=100
     )
     id_num = models.CharField(max_length=200,blank=True)
     capacity = models.IntegerField(blank=True, null=True)
@@ -30,6 +24,10 @@ class Facility(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def get_absolute_url(self):
+        return reverse('detail', kwargs={'pk': self.pk})
+    
 
 class Inspection(models.Model):
     facility = models.ForeignKey(
@@ -44,8 +42,8 @@ class Inspection(models.Model):
     state_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
-        return ("{0} - {1} {2}".format(self.facility.name, self.inspection_type, self.date))
-
+        return self.documentcloud_url
+    #     return ("{0} - {1} {2}".format(self.facility.name, self.inspection_type, self.date))
 
 class Complaint(models.Model):
     facility = models.ForeignKey(
@@ -89,10 +87,17 @@ class Allegation(models.Model):
     def __str__(self):
         return ("{0}-{1}".format(self.complaint.intake_id, self.allegation_num))
 
-class Penalties(models.Model):
+class Penalty(models.Model):
+
+    class Meta:
+        verbose_name_plural = "penalties"
+
     facility = models.ForeignKey(
         Facility, on_delete=models.SET_NULL,
         blank=True, null=True
     )
     date = models.DateField()
     penalty = models.IntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return ("{0}-{1}".format(self.facility, self.date))
