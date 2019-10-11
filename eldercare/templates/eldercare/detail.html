@@ -1,15 +1,14 @@
-{% extends 'eldercare/base.html' %}
+{% extends 'base.html' %}
 
-{% block header %}
-  <h1>{% block title %}{{facility.name}}{% endblock %}</h1>
-{% endblock %}
+{% block title %}{{facility.name}}{% endblock %}
 
 {% block content %}
 {% load static %}
+{% load humanize %}
     <div class="row facility-header">
         <div class="col d-block">
-            <h1>{{facility.name}}</h1>
-            <h2 class="type">{{facility.type}}{% if facility.level %} - Level {{facility.level}}{% endif %}</h2>
+            <h1>{{object.name}}</h1>
+            <h2 class="type">{{facility.care_type}}{% if facility.level %} - Level {{facility.level}}{% endif %}</h2>
         </div>
         <div class="col-1 d-block">
             <a href="{% url 'index' %}">Home</a>
@@ -23,13 +22,19 @@
             <div class="address">
                 <div class="data-header">Address</div>
                 <div class="data-item data-container">
-                    {{facility.address}}, {{facility.town}}<br>
+                    {{object.address}}, {{object.town}}<br>
                     {{facility.county}} County
                 </div>
             </div>
             <div class="capacity data-container">
                 <div class="data-header">Capacity</div>
                 <div class="data-item">{{facility.capacity}}</div>
+            </div>
+            <div class="penalties data-container">
+                <div class="data-header">Penalties</div>
+                <div class="data-item">
+                    ${{tot_penalties|intcomma}}
+                </div>
             </div>
         </div>
         <div class='col-sm-5 d-flex justify-content-between'>
