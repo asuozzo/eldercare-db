@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block header %}
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/preview/searchPane/dataTables.searchPane.min.css">
+  <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/plug-ins/preview/searchPane/dataTables.searchPane.min.js"></script>
+
+  {% endblock %}
+
+{% block content %}
+
+<table id="facilitiesTable">
+  <thead>
+    <tr>
+      <th>Facility</th>
+      <th>Type</th>
+      <th>Town</th>
+      <th>County</th>
+      <th>Capacity</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for facility in object_list %}
+    <tr>
+      <td><a href="{% url 'detail' facility.id %}">{{facility.name}}</a>
+        {% if facility.in_business == False %}
+          CLOSED
+        {% endif %}
+      </td>
+      <td>{{facility.care_type}}</td>
+      <td>{{facility.town}}</td>
+      <td>{{facility.county}}</td>
+      <td>{{facility.capacity}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  $(document).ready( function () {
+    $('#facilitiesTable').DataTable({
+      "searchPane": {
+        "columns":[1,2,3]
+      },
+      "columnDefs": [
+        { "type": "num", "targets": 4 }
+      ],
+      "order": [[ 4, "desc" ]]
+    });
+  } );
+</script>
+{% endblock %}
