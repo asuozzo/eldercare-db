@@ -2,112 +2,161 @@
 
 {% block title %}{{facility.name}}{% endblock %}
 
+{% block header %}
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://kit.fontawesome.com/48476823f7.js" crossorigin="anonymous"></script>
+<style>
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .axis text {
+        font: 10px sans-serif;
+    }
+
+    .cells path {
+        fill: none;
+        pointer-events: all;
+    }
+
+    .cells circle {
+        stroke-width: .4;
+        stroke:lightgray;
+    }
+    svg .annotation {
+        stroke-dasharray:4;
+        stroke:rgb(99, 99, 99);
+    }
+    svg text {
+        fill:rgb(99, 99, 99);
+        font-family:sans-serif;
+        font-size:.8em;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 {% load static %}
 {% load humanize %}
-    <div class="row facility-header">
-        <div class="col d-block">
-            <h1>{{object.name}}</h1>
-            <h2 class="type">{{facility.care_type}}{% if facility.level %} - Level {{facility.level}}{% endif %}</h2>
-        </div>
-        <div class="col-1 d-block">
-            <a href="{% url 'index' %}">Home</a>
-        </div>
+<div class="row facility-header">
+    <div class="col d-block">
+        <h1>{{object.name}}</h1>
+        <h2 class="type">{{facility.care_type}}{% if facility.level %} - Level {{facility.level}}{% endif %}</h2>
     </div>
-    <div class="row facility-details">
-        <div class='col-sm'>
-            <img src="{% static 'img/map.png' %}" class="img-fluid">
-        </div>
-        <div class='col-sm'>
-            <div class="address">
-                <div class="data-header">Address</div>
-                <div class="data-item data-container">
-                    {{object.address}}, {{object.town}}<br>
-                    {{facility.county}} County
-                </div>
-            </div>
-            <div class="capacity data-container">
-                <div class="data-header">Capacity</div>
-                <div class="data-item">{{facility.capacity}}</div>
-            </div>
-            <div class="penalties data-container">
-                <div class="data-header">Penalties</div>
-                <div class="data-item">
-                    ${{tot_penalties|intcomma}}
-                </div>
+    <div class="col-1 d-block">
+        <a href="{% url 'index' %}">Home</a>
+    </div>
+</div>
+<div class="row facility-details">
+    <div class='col-md-5 col-lg-4 col-xl-3'>
+        <div id="map" style="min-height:200px;height:100%;width:100%;"></div>
+    </div>
+    <div class='col-md'>
+        <div class="address">
+            <div class="data-header">Address</div>
+            <div class="data-item data-container">
+                {{object.address}}, {{object.town}}<br>
+                {{facility.county}} County
             </div>
         </div>
-        <div class='col-sm-5 d-flex justify-content-between'>
-            <div class="p-2 flex-grow-1">
-                <div class="data-header">Complaints</div>
-                <div class="data-item">{{complaints.count}}</div>
-            </div>
-            <div class="p-2 flex-grow-1">
-                <div class="data-header">Allegations</div>
-                <div class="data-item">{{facility.allegation_set.count}}</div>
-            </div>
-            <div class="p-2 flex-grow-1">
-                <div class="data-header">Inspections</div>
-                <div class="data-item">{{inspections.count}}</div>
+        <div class="capacity data-container">
+            <div class="data-header">Capacity</div>
+            <div class="data-item">{{facility.capacity}}</div>
+        </div>
+        <div class="penalties data-container">
+            <div class="data-header">Penalties</div>
+            <div class="data-item">
+                ${{tot_penalties|intcomma}}
             </div>
         </div>
     </div>
-    <div class="row facility-complaints">
-        <div class="col-xl d-block">
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="complaints-tab" data-toggle="tab" href="#complaints" role="tab" aria-controls="complaints" aria-selected="true">Complaints</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="inspections-tab" data-toggle="tab" href="#inspections" role="tab" aria-controls="inspections" aria-selected="false">Inspections</a>
-                </li>
-            </ul>
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="complaints" role="tabpanel" aria-labelledby="complaints-tab">
-                    <table class="table table-sm mt-3">
-                        <thead>
-                            <tr>
-                                <th>Complaint Date</th>
-                                <th>Number</th>
-                                <th>Finding</th>
-                                <th>Related Inspection</th>
-                            </tr>
-                        </thead>
-                        {% for complaint in complaints %}
-                            {% for allegation in complaint.allegation_set.all %}
-                            <tr>
-                                <td>{{complaint.received_start_date}}</td>
-                                <td>{{allegation.allegation_num}}</td>
-                                <td>{{allegation.finding}}</td>
-                                <td>
-                                    {% if complaint.related_inspection %}
-                                        {{complaint.related_inspection}}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% endfor %}
-                    </table>
-                </div>
-                <div class="tab-pane fade" id="inspections" role="tabpanel" aria-labelledby="inspections-tab">
-                    <table class="table table-sm mt-3">
-                        <thead>
-                            <tr>
-                                <th>Inspection</th>
-                                <th>Date</th>
-                                <th>Link</th>
-                            </tr>
-                        </thead>
-                        {% for inspection in inspections %}
-                        <tr>
-                            <td>{{inspection.inspection_type}}</td>
-                            <td>{{inspection.date}}</td>
-                            <td><a href="{{inspection.documentcloud_url}}" target="_blank">Link</a></td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-                </div>
+    <div class='col-md-4 col-lg-5 justify-content-between'>
+        <div class="row">
+            <div class="col-12">
+                <div class="data-header">Annual citations</div>
+                <svg id="year-chart" width="100%" height="200"></svg>
             </div>
         </div>
     </div>
+</div>
+<div class="row facility-scores">
+    <div class="col-xl d-block">
+        <div class="data-header">Cumulative facility violation scores since January 2014</div>
+        <svg id="facilityScores" width="100%" height="100">
+            <defs>
+                <marker id="arrow" markerUnits="strokeWidth" markerWidth="7" markerHeight="7" viewBox="0 0 12 12"
+                    refX="6" refY="6" orient="auto">
+                    <path d="M2,2 L10,6 L2,10 L6,6 L2,2" style="fill: #000;"></path>
+                </marker>
+            </defs>
+        </svg>
+    </div>
+</div>
+<div class="row facility-complaints">
+    <div class="col-xl d-block">
+        <h5>Complaints</h5>
+        <p>Between January 1, 2014, and April 4, 2019, {{facility.name}} received <span class="highlight complaint">{{complaints_count}}</span>
+            complaints. The Division of Licensing and Protection found that <span
+                class="highlight substantiated">{{substantiated_count}}</span> {% if substantiated_count == 1 %}was{% else %}were{% endif %} substantiated.</p>
+    </div>
+</div>
+<div class="row facility-inspections">
+    <div class="col-xl d-block">
+        <h5>Inspections</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="collapse-icon"></th>
+                    <th>Date</th>
+                    <th>Citations</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inspection in inspections %}
+                <tr data-toggle="collapse" data-target="#inspection{{inspection.id}}" class="clickable collapsed">
+                    <td class="collapse-icon"><i class="fa" aria-hidden="true"></i></td>
+                    <td class="align-left">{{inspection.date}}</td>
+                    <td>{{inspection.citation_set.all|length}}</td>
+                    <!-- <td></td> -->
+                </tr>
+                <tr>
+                    <td colspan="4" class="sub-table">
+                        <div id="inspection{{inspection.id}}" class="citations-detail collapse">
+                            {% if inspection.citation_set.all %}
+                            <table class="table">
+                                {% for citation in inspection.citation_set.all %}
+                                    <tr>
+                                        <td>{{citation.citation_num}}</td>
+                                        <td>{{citation.citation_type}} > {{citation.citation_subtype}}</td>
+                                        <td class="text-center">
+                                            <div class="ss {{citation.severity_scope.letter}}">
+                                                {{citation.severity_scope.letter}}</div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                                {% endif %}
+                            <a href="{{inspection.documentcloud_url}}" target="_blank">Read the full inspection report</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    // citation chart setup
+    var citations = {{citation_type_json|safe}};
+    var citation_totals = {{citation_json|safe}};
+    var scoresList = {{scores}};
+    var score = {{facility.score}};
+    var coords = [{{facility.lon}}, {{facility.lat}}]
+</script>
+
+<script src="{% static 'js/charts.js' %}"></script>
 {% endblock %}
