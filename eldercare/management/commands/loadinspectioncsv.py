@@ -11,6 +11,7 @@ class Command(BaseCommand):
         csv_file = open(csv_path, 'r')
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
+            print(row["Facility"])
             facility = Facility.objects.get(name=row["Facility"])
             date = datetime.strptime(row["survey date"], "%m/%d/%Y").date()
             if Inspection.objects.filter(facility=facility,date=date,documentcloud_url=row["documentcloud url"]).exists():
