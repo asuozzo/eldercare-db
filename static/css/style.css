@@ -8,9 +8,12 @@ h2.type {
     color:#888;
 }
 
-.facility-header, .facility-details {
-    border-bottom:1px solid #d3d3d3;
-    padding:10px 0 10px 0;
+.facility-header,
+.facility-details,
+.facility-scores,
+.facility-complaints {
+    border-bottom: 1px solid #d3d3d3;
+    padding: 10px 0 10px 0;
     margin-bottom: 10px;
 }
 
@@ -26,4 +29,81 @@ h2.type {
 
 .facility-complaints {
     padding-top:15px;
+}
+
+svg .axis .domain {
+    display: none;
+}
+
+svg .tick>line {
+    display: none;
+}
+
+svg text {
+    font-family: sans-serif;
+    font-size: 14;
+}
+
+.highlight {
+    font-weight:bold;
+    font-size:1.2em;
+}
+
+.complaint {
+    color:rgb(85, 85, 85);
+}
+
+.substantiated {
+    color:rgb(136, 0, 0);
+}
+
+.sub-table {
+    padding:0 !important;
+    border-top:0px !important;
+}
+
+.citations-detail {
+    padding-top:20px;
+    padding-bottom:20px;
+}
+
+.ss {
+    padding:5px;
+    border-radius:3px;
+    background-color:#888;
+}
+
+.A, .B, .C {
+    background-color:#ded9d7;
+}
+
+.D, .E, .F {
+    background-color:#d8836a;
+}
+
+.G, .H, .I {
+    background-color:#b84326;
+}
+
+.J, .K, .L {
+    background-color:#a51b02;
+}
+
+[data-toggle="collapse"] i:before {
+    content: "\f146";
+}
+
+[data-toggle="collapse"].collapsed i:before {
+    content: "\f0fe";
+}
+
+.collapse-icon {
+    width:30px;
+}
+
+.mapbox-map {
+    width: 100%;
+    height: 600px;
+    margin: 0 auto;
+    background: gray;
 }
