@@ -12,6 +12,7 @@ django-tables2 = "*"
 gunicorn = "*"
 whitenoise = "*"
 django-bakery = "*"
+requests = "*"
 
 [requires]
 python_version = "3.7"
