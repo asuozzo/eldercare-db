@@ -23,6 +23,9 @@ class Facility(models.Model):
     accs = models.BooleanField(default=False)
     erc = models.BooleanField(default=False)
     notes = models.TextField(blank=True)
+    opendate = models.DateField(blank=True, null=True)
+    closedate = models.DateField(blank=True, null=True)
+    formername = models.CharField(max_length=200,blank=True, null=True)
 
     score = models.IntegerField(default=0)
 
