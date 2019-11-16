@@ -2,12 +2,17 @@
 {% block title %}Home{% endblock %}
 
 {% block header %}
-  <!-- <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
-  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/preview/searchPane/dataTables.searchPane.min.css">
-  <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/plug-ins/preview/searchPane/dataTables.searchPane.min.js"></script> -->
 
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <style>
+  [v-cloak] {
+  display: none;
+  }
+  .marker-title {
+      color:black;
+  }
+
+</style>
 
 {% endblock %}
 
@@ -38,9 +43,22 @@
                     <option>Windsor</option>
                 </select>
             </div>
+            <div class="form-group">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="alr-select" v-model="alr">
+                    <label class="form-check-label" for="alr-select">Assisted Living Residences</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="rcf-select" v-model="rcf">
+                    <label class="form-check-label" for="rcf-select">Residential Care Facilities</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-light" v-on:click="resetFilters">Reset all filters</button>
+            </div>
         </div>
         <div class="col-md-6">
-            <mapbox-map></mapbox-map>
+            <mapbox-map :facilities="filteredFacilities"></mapbox-map>
         </div>
     </div>
 
@@ -48,18 +66,24 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th @click="sort('name')">Facility</th>
-                    <th @click="sort('type')">Type</th>
-                    <th @click="sort('town')">Town</th>
-                    <th @click="sort('capacity')">Capacity</th>
+                    <th class="name-header" @click="sort('name')">Facility</th>
+                    <th class="town-header" @click="sort('town')">Town</th>
+                    <th class="capacity-header" @click="sort('capacity')">Capacity</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody v-cloak v-if="filteredFacilities.length > 0">
                 <tr v-for="facility in filteredFacilities">
-                    <td><a :href="[[ facility.id ]]">[[ facility.name ]]</a> <span v-if="facility.status == false">- Closed</span></td>
-                    <td>[[ facility.type ]]</td>
-                    <td>[[ facility.town ]]</td>
-                    <td>[[ facility.capacity ]]</td>
+                    <td class="facility-name"><a :href="[[ facility.id ]]">[[ facility.name ]]</a> <span class="facility-closed" v-if="facility.status == false">-
+                            Closed</span>
+                        <div class="facility-type">[[ facility.type ]]</div>
+                    </td>
+                    <td class="facility-town">[[ facility.town ]]</td>
+                    <td class="facility-capacity">[[ facility.capacity ]]</td>
+                </tr>
+            </tbody>
+            <tbody v-cloak v-else>
+                <tr>
+                    <td colspan="3">Whoops! We couldn't find any facilities matching your search. Try removing filters.</td>
                 </tr>
             </tbody>
         </table>
@@ -68,7 +92,7 @@
 
 {% endblock %}
 
-{% block footer %}
+{% block footerscripts %}
 <script type='text/javascript'>
 
     var facilities = {{facilities_json|safe}};
@@ -78,24 +102,71 @@
         'pk.eyJ1Ijoic2V2ZW5kYXlzIiwiYSI6ImNrMXM3aTg0azA5YTgzbW8wbmcyY3MzZ2gifQ.BRHRdBxzm9kdnwf3NTiwwQ';
 
     Vue.component('mapbox-map', {
-        data: function(){
-            return {facilities}
+        props: ['facilities'],
+        data: function () {
+            return {
+                map: "",
+                markerArray: []
+            }
         },
         template: '<div class="mapbox-map" id="mapbox-map"></div>',
         mounted: function(){
-            const map = new mapboxgl.Map({
+            this.map = new mapboxgl.Map({
                 container: 'mapbox-map',
                 style: 'mapbox://styles/mapbox/light-v10',
-                center: [-73.1,43.5],
-                zoom: 6
+                center: [-72.5752484,43.868229],
+                zoom: 6,
+                minZoom:6,
+                maxBounds: [[-75.0043,42.5683],[-70.1461,45.1444]]
             });
-            const coords = []
+            this.map.scrollZoom.disable();
+            this.map.addControl(new mapboxgl.NavigationControl());
 
             this.facilities.forEach((facility) => {
-                new mapboxgl.Marker()
+                var el = document.createElement('div');
+                el.className = 'marker';
+                if (facility.type== "Assisted Living Residence"){
+                    el.className += ' alr-marker'
+                } else {
+                    el.className += ' rcf-marker'
+                }
+                el.setAttribute("id", "marker"+facility.id)
+                
+                let marker = new mapboxgl.Marker(el)
                     .setLngLat([facility.lon, facility.lat])
-                    .addTo(map);
-        });
+                    .setPopup(new mapboxgl.Popup({ offset: 25, closeOnClick:true,closeButton:false }) // add popups
+                    .setHTML('<span class="marker-title">' + facility.name + '</span>'))
+                    .addTo(this.map);
+
+                this.markerArray.push({
+                    id:facility.id,
+                    coords:[facility.lon, facility.lat]
+                })
+            });
+        },
+        watch:{
+            'facilities'(){                
+                this.$emit('update:facilities',this.facilities);
+
+                var bounds = new mapboxgl.LngLatBounds();
+                $(".marker").hide();
+                this.facilities.forEach((facility)=>{
+                    let marker = this.markerArray.find(function(marker){
+                        return marker.id == facility.id
+                    });
+                    bounds.extend(marker.coords);
+                    $("#marker"+facility.id).show()
+                });
+                if(bounds._ne){
+                    this.map.fitBounds(bounds, { padding: 50,maxZoom:12 });
+                } else {
+                    this.map.flyTo({
+                        center: [-72.5752484,43.868229],
+                        zoom: 6
+                    })
+                }
+                
+            }
         }
     })
 
@@ -107,7 +178,10 @@
             county: '',
             currentSort:'name',
             currentSortDir:'asc',
+            alr:true,
+            rcf:true,
             facilities: facilities,
+            test:"hey"
         },
         methods: {
             sort:function(s) {
@@ -116,15 +190,52 @@
                 this.currentSortDir = this.currentSortDir==='asc'?'desc':'asc';
                 }
                 this.currentSort = s;
+            },
+            resetFilters:function(){
+                this.alr=true;
+                this.rcf=true;
+                this.search="";
+                this.county="";
             }
         },
         computed: {
             filteredFacilities() {
                 filteredFacilities = this.facilities
+                if (!this.alr){
+                    filteredFacilities=filteredFacilities.filter(facility => {
+                        if (facility.type != "Assisted Living Residence"){
+                            return facility
+                        }
+                    })
+                }
+                if (!this.rcf){
+                    filteredFacilities=filteredFacilities.filter(facility => {
+                        if (facility.type != "Residential Care Facility"){
+                            return facility
+                        }
+                    })
+                }
                 filteredFacilities = filteredFacilities.filter(facility => {
-                    searchMatch = facility.name.toLowerCase().includes(this.search.toLowerCase());
-                    countyMatch = facility.county.includes(this.county);
-                    return (searchMatch & countyMatch)
+                    if (this.search.length > 0){
+                        var searchList = this.search.toLowerCase().split(" ");
+                        var match = true;
+                        searchList.forEach(function(s){
+                            nameMatch = facility.name.toLowerCase().includes(s);
+                            townMatch = facility.town.toLowerCase().includes(s);
+
+                            if (!(nameMatch || townMatch)){
+                                match = false;
+                            }
+                        })
+                        if (match){
+                            return facility;
+                        }
+                    } else {
+                        return facility;
+                    }
+                })
+                filteredFacilities = filteredFacilities.filter(facility=>{
+                    return facility.county.includes(this.county);
                 })
                 filteredFacilities = filteredFacilities.sort((a,b) => {
                     let modifier = 1;
@@ -135,7 +246,7 @@
                 });
                 return filteredFacilities;
             }
-        }
+        },
     });
 
 

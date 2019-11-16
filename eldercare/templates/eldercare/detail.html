@@ -36,6 +36,8 @@
         font-family:sans-serif;
         font-size:.8em;
     }
+
+    
 </style>
 {% endblock %}
 
@@ -44,7 +46,10 @@
 {% load humanize %}
 <div class="row facility-header">
     <div class="col d-block">
-        <h1>{{object.name}}</h1>
+        <h1>{{object.name}}{% if facility.formername %} <span style="facility-formername">(Formerly {{facility.formername}})</span>{% endif %}{% if facility.closedate %} <span
+                style="facility-status">(Closed {{facility.closedate|date:"F Y"}})</span>{% elif facility.opendate %}
+                <span
+                style="facility-status">(Opened {{facility.opendate|date:"F Y"}})</span>{% endif %}</h1>
         <h2 class="type">{{facility.care_type}}{% if facility.level %} - Level {{facility.level}}{% endif %}</h2>
     </div>
     <div class="col-1 d-block">
@@ -117,31 +122,38 @@
             </thead>
             <tbody>
                 {% for inspection in inspections %}
-                <tr data-toggle="collapse" data-target="#inspection{{inspection.id}}" class="clickable collapsed">
-                    <td class="collapse-icon"><i class="fa" aria-hidden="true"></i></td>
+                <tr {% if inspection.citation_set.all %}data-toggle="collapse" data-target="#inspection{{inspection.id}}"{% endif %}
+                    class="clickable collapsed">
+                    <td class="collapse-icon">{% if inspection.citation_set.all %}<i class="fa" aria-hidden="true"></i>{% endif %}</td>
                     <td class="align-left">{{inspection.date}}</td>
                     <td>{{inspection.citation_set.all|length}}</td>
                     <!-- <td></td> -->
                 </tr>
                 <tr>
                     <td colspan="4" class="sub-table">
+                        {% if inspection.citation_set.all %}
                         <div id="inspection{{inspection.id}}" class="citations-detail collapse">
-                            {% if inspection.citation_set.all %}
                             <table class="table">
                                 {% for citation in inspection.citation_set.all %}
                                     <tr>
                                         <td>{{citation.citation_num}}</td>
                                         <td>{{citation.citation_type}} > {{citation.citation_subtype}}</td>
                                         <td class="text-center">
-                                            <div class="ss {{citation.severity_scope.letter}}">
+                                            <div class="ss {{citation.severity_scope.letter}}" 
+                                                 data-toggle="popover"
+                                                 data-trigger="hover"
+                                                 title="{{citation.severity_scope.letter}}"
+                                                 data-content="<b>Severity</b><br>{{citation.severity_scope.severity}}<br><b>Scope</b><br>{{citation.severity_scope.scope}}"
+                                            >
                                                 {{citation.severity_scope.letter}}</div>
+                                                
                                         </td>
                                     </tr>
                                 {% endfor %}
                             </table>
-                                {% endif %}
                             <a href="{{inspection.documentcloud_url}}" target="_blank">Read the full inspection report</a>
                         </div>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -149,13 +161,21 @@
         </table>
     </div>
 </div>
+{% endblock %}
+{% block footerscripts %}
 <script>
     // citation chart setup
     var citations = {{citation_type_json|safe}};
     var citation_totals = {{citation_json|safe}};
     var scoresList = {{scores}};
     var score = {{facility.score}};
-    var coords = [{{facility.lon}}, {{facility.lat}}]
+    var coords = [{{facility.lon}}, {{facility.lat}}];
+
+    $(function () {
+    $('[data-toggle="popover"]').popover({
+        "html":true
+    })
+    })
 </script>
 
 <script src="{% static 'js/charts.js' %}"></script>
