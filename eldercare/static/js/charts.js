@@ -231,6 +231,8 @@ var map = new mapboxgl.Map({
     zoom: 9
 });
 
+map.scrollZoom.disable();
+
 new mapboxgl.Marker()
     .setLngLat(coords)
     .addTo(map);
