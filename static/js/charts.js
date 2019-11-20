@@ -1,112 +1,114 @@
 var draw = function(){
-var svg = d3.select("#year-chart"),
-  margin = {top: 20, right: 20, bottom: 30, left: 35},
-  width = parseInt(svg.style('width')) - margin.left - margin.right,
-  height = +svg.attr("height") - margin.top - margin.bottom;
+  var svg = d3.select("#year-chart"),
+    margin = {top: 20, right: 20, bottom: 30, left: 35},
+    width = parseInt(svg.style('width')) - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom;
 
-svg.selectAll("*").remove();
-
-// this range should actually come from the database
-var start = new Date('January 1, 2014').getFullYear();
-var end = new Date().getFullYear();
-var years = Array();
-for(i = start; i <= end; i++){years.push(i)};
-
-var keys=["L","K","J","I","H","G","F","E","D","C","B","A"]
-
-// reshape json
-var data = []
-years.forEach(function(y){
-var d = {}
-d["year"] = y;
-// set 0 default for each level
-keys.forEach(function(k){
-  d[k]=0;
-})
-d["total"] = 0;
-citations.forEach(function(c){
-  if (String(c.year)==String(y)){
-    d[c.severity_scope__letter] = c.severity_scope__letter__count;
+  svg.selectAll("*").remove();
+  if (Object.keys(citations).length == 0){
+   citations = [{year:2014,severity_code:1,count:0}]
   }
-})
-data.push(d);
-})
+    // this range should actually come from the database
+    var start = new Date('January 1, 2014').getFullYear();
+    var end = new Date().getFullYear();
+    var years = Array();
+    for (i = start; i <= end; i++) { years.push(i) };
 
-data.forEach(function(d){
-var year = d["year"]
-citation_totals.forEach(function(i){
-  if (i.year == year){
-    d["total"] = i.severity_scope__count;
-  }
-})
-return d;
-})
+    var keys = [3, 2, 1];
 
+    // reshape json
+    var data = []
+    years.forEach(function (y) {
+      var d = {}
+      d["year"] = y;
+      // set 0 default for each level
+      keys.forEach(function (k) {
+        d[k] = 0;
+      })
+      d["total"] = 0;
+      citations.forEach(function (c) {
+        if (String(c.year) == String(y)) {
+          d[c.severity_code] = c.count;
+        }
+      })
+      data.push(d);
+    })
 
-g = svg.append("g").attr("transform", "translate(" + margin.left + "," +
-                       margin.top + ")");
+    data.forEach(function (d) {
+      var year = d["year"]
+      citation_totals.forEach(function (i) {
+        if (i.year == year) {
+          d["total"] = i.severity_scope__count;
+        }
+      })
+      return d;
+    })
 
-var y = d3.scaleBand()
-  .rangeRound([0, height])
-  .paddingInner(0.05)
-  .align(0.1);
+    g = svg.append("g").attr("transform", "translate(" + margin.left + "," +
+      margin.top + ")");
 
-var x = d3.scaleLinear()
-  .rangeRound([0, width]);
+    var y = d3.scaleBand()
+      .rangeRound([0, height])
+      .paddingInner(0.05)
+      .align(0.1);
 
-var z = d3.scaleOrdinal()
-  .range([
-    "#a51b02", "#a51b02", "#a51b02",
-    "#b84326", "#b84326", "#b84326",
-    "#d8836a","#d8836a","#d8836a",
-    "#ded9d7","#ded9d7","#ded9d7"
-    ]);
+    var x = d3.scaleLinear()
+      .rangeRound([0, width]);
 
-  y.domain(data.map(function(d) { return d.year; }));
-  x.domain([0, d3.max(data, function(d) {return d.total;})]).nice();
-  z.domain(keys);
+    var z = d3.scaleOrdinal()
+      .range([
+        "#a51b02", "#b84326",
+        "#d8836a", "#ded9d7",
+      ]);
 
-var bars = g.append("g")
-.selectAll("g")
-.data(d3.stack().keys(keys)(data))
-.enter().append("g")
+    y.domain(data.map(function (d) { return d.year; }));
+    var chartMax = d3.max(data, function (d) { return d.total; });
+    if (chartMax < 20) {
+      chartMax = 20
+    }
+    x.domain([0, chartMax]).nice();
+    z.domain(keys);
 
-bars.attr("fill", function(d) { return z(d.key); })
-  .selectAll("rect")
-  .data(function(d) { return d; })
-  .enter().append("rect")
-    .attr("class","bars")
-    .attr("y", function(d) { return y(d.data.year); })
-    .attr("x", function(d) {
-        return x(d[0]); })
-    .attr("width", function(d) { return x(d[1]) - x(d[0]); })
-    .attr("height", y.bandwidth());
+    var bars = g.append("g")
+      .selectAll("g")
+      .data(d3.stack().keys(keys)(data))
+      .enter().append("g")
 
-var text = g.append("g")
-  .selectAll("text")
-  .data(data)
-  .enter()
-  .append("text")
-  .attr("x",function(d){
-  return x(d.total)+5
-})
-  .attr("y",function(d){
-  return y(d.year)+y.bandwidth()/2+6
-})
-  .text(function(d){
-  if (d.total>0){
-    return d.total
-  } else {
-    return ""
-  }
+    bars.attr("fill", function (d) { return z(d.key); })
+      .selectAll("rect")
+      .data(function (d) { return d; })
+      .enter().append("rect")
+      .attr("class", "bars")
+      .attr("y", function (d) { return y(d.data.year); })
+      .attr("x", function (d) {
+        return x(d[0]);
+      })
+      .attr("width", function (d) { return x(d[1]) - x(d[0]); })
+      .attr("height", y.bandwidth());
 
-})
+    g.append("g")
+      .selectAll("text")
+      .data(data)
+      .enter()
+      .append("text")
+      .attr("x", function (d) {
+        return x(d.total) + 5
+      })
+      .attr("y", function (d) {
+        return y(d.year) + y.bandwidth() / 2 + 6
+      })
+      .text(function (d) {
+        if (d.total > 0) {
+          return d.total
+        } else {
+          return ""
+        }
+      })
 
-
-g.append("g")
-  .attr("class", "axis")
-  .attr("transform", "translate(0,0)")
-  .call(d3.axisLeft(y));
+    g.append("g")
+      .attr("class", "axis")
+      .attr("transform", "translate(0,0)")
+      .call(d3.axisLeft(y));
 }
 
 d3.select(window).on('resize', draw);
@@ -124,7 +126,7 @@ var margin = {top: 40, right: 20, bottom: 40, left: 20},
 height = scoreSvg.attr("height") - margin.top - margin.bottom;
 
 var max = d3.max(scores, function(d){return d.value;});
-var colorScale = d3.scaleLinear().domain([0,max]).range(['#fff9f7', '#a51b02']);
+  var colorScale = d3.scaleLinear().domain([0, 100, max]).range(['#fff9f7', "#d8836a",'#a51b02']);
 scoreSvg.selectAll(".chart-content").remove();
 var width = parseInt(scoreSvg.style('width')) - margin.left - margin.right;
 var x = d3.scaleLinear()
@@ -227,12 +229,19 @@ mapboxgl.accessToken =
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v10',
-    center: coords,
+    center: mapMarker.coords,
     zoom: 9
 });
-
 map.scrollZoom.disable();
 
-new mapboxgl.Marker()
-    .setLngLat(coords)
+var el = document.createElement('div');
+el.className = 'marker';
+if (mapMarker.type == "Assisted Living Residence") {
+  el.className += ' alr-marker'
+} else {
+  el.className += ' rch-marker'
+}
+
+new mapboxgl.Marker(el)
+    .setLngLat(mapMarker.coords)
     .addTo(map);
