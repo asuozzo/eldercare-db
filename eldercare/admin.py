@@ -8,7 +8,7 @@ from .models import (
 
 # Register your models here.
 class FacilityAdmin(admin.ModelAdmin):
-    list_display = ('name', 'care_type', 'capacity', 'town', 'county','score')
+    list_display = ('name', 'slug','care_type', 'capacity', 'town', 'county','score')
     search_fields = ('name',)
 
 admin.site.register(Facility, FacilityAdmin)
