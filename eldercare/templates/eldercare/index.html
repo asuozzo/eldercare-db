@@ -18,6 +18,28 @@
 
 {% block content %}
 <div id="app">
+    <div class="row header-text">
+        <div class="col-12">
+            <p>
+                Forty federally regulated nursing homes operate in Vermont. But 137 other state-regulated residential
+                care homes and assisted living residences provide a stepped-down level of care. Inspectors with
+                Vermont’s Department of Disabilities, Aging and Independent Living visit them once every two years, or
+                more frequently when complaints are filed. Inspectors cite homes for violations including paperwork
+                problems, cleanliness, medication management, and failure to protect a resident from abuse or neglect.
+            </p>
+
+                <p>DAIL posts many of the inspections on its website. We’ve digitized all 794 inspections conducted
+                between January 1, 2014 and September 30, 2019 and made the data available in a public database. Search for a
+                facility, town, or filter by county or residence type to find out more about each facility. You’ll also
+                find the number of complaints per facility — and whether the state considered them founded.</p>
+
+                <p>To look up data on nursing homes — which are federally regulated — visit <a
+                    href="https://www.medicare.gov/nursinghomecompare/search.html?">Nursing Home Compare</a>.</p>
+
+                <p class="small"><i>Note: Most, but not all, residential care facilities serve elder populations; some primarily or
+                additionally serve people with disabilities.</i></p>
+        </div>
+    </div>
     <div class="row filters">
         <div class="col-md-6">
             <div class="form-group">
@@ -49,8 +71,8 @@
                     <label class="form-check-label" for="alr-select">Assisted Living Residences</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="rcf-select" v-model="rcf">
-                    <label class="form-check-label" for="rcf-select">Residential Care Facilities</label>
+                    <input class="form-check-input" type="checkbox" id="rch-select" v-model="rch">
+                    <label class="form-check-label" for="rch-select">Residential Care Facilities</label>
                 </div>
             </div>
             <div class="form-group">
@@ -73,7 +95,7 @@
             </thead>
             <tbody v-cloak v-if="filteredFacilities.length > 0">
                 <tr v-for="facility in filteredFacilities">
-                    <td class="facility-name"><a :href="[[ facility.id ]]">[[ facility.name ]]</a> <span class="facility-closed" v-if="facility.status == false">-
+                    <td class="facility-name"><a :href="[[ facility.slug ]]">[[ facility.name ]]</a> <span class="facility-closed" v-if="facility.status == false">-
                             Closed</span>
                         <div class="facility-type">[[ facility.type ]]</div>
                     </td>
@@ -117,7 +139,7 @@
                 center: [-72.5752484,43.868229],
                 zoom: 6,
                 minZoom:6,
-                maxBounds: [[-75.0043,42.5683],[-70.1461,45.1444]]
+                maxBounds: [[-76.0043,41.5683],[-69.1461,46.1444]]
             });
             this.map.scrollZoom.disable();
             this.map.addControl(new mapboxgl.NavigationControl());
@@ -128,7 +150,7 @@
                 if (facility.type== "Assisted Living Residence"){
                     el.className += ' alr-marker'
                 } else {
-                    el.className += ' rcf-marker'
+                    el.className += ' rch-marker'
                 }
                 el.setAttribute("id", "marker"+facility.id)
                 
@@ -179,7 +201,7 @@
             currentSort:'name',
             currentSortDir:'asc',
             alr:true,
-            rcf:true,
+            rch:true,
             facilities: facilities,
             test:"hey"
         },
@@ -193,7 +215,7 @@
             },
             resetFilters:function(){
                 this.alr=true;
-                this.rcf=true;
+                this.rch=true;
                 this.search="";
                 this.county="";
             }
@@ -208,9 +230,9 @@
                         }
                     })
                 }
-                if (!this.rcf){
+                if (!this.rch){
                     filteredFacilities=filteredFacilities.filter(facility => {
-                        if (facility.type != "Residential Care Facility"){
+                        if (facility.type != "Residential Care Home"){
                             return facility
                         }
                     })
