@@ -26,19 +26,19 @@ class Command(BaseCommand):
                     county=row["County"]
                 )
 
-def get_capacity(rcf_capacity, alr_capacity):
-    if rcf_capacity == "":
+def get_capacity(rch_capacity, alr_capacity):
+    if rch_capacity == "":
         if alr_capacity != "":
             return alr_capacity
         else:
             return None
     elif alr_capacity == "":
-        return rcf_capacity
+        return rch_capacity
     else:
         return 0
 
-def get_level(rcf_level):
-    if rcf_level == "":
+def get_level(rch_level):
+    if rch_level == "":
         return None
     else:
-        return rcf_level
+        return rch_level
