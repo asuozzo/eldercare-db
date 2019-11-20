@@ -8,5 +8,5 @@ from eldercare.views import (
 
 urlpatterns = [
     path('', FacilityListView.as_view(), name='index'),
-    path('<int:pk>/', FacilityDetailView.as_view(), name='detail')
+    path('<str:slug>/', FacilityDetailView.as_view(), name='detail')
 ]
