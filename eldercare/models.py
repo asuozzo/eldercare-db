@@ -10,6 +10,11 @@ class Facility(models.Model):
         verbose_name_plural = "facilities"
 
     name = models.CharField(max_length=200)
+    slug = models.SlugField(
+        editable=False,
+        default="",
+        max_length=300,
+    )
     care_type = models.CharField(
         max_length=100
     )
@@ -34,9 +39,14 @@ class Facility(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        value = self.name + self.id_num
+        self.slug = slugify(value, allow_unicode=True)
+        super().save(*args, **kwargs)
     
     def get_absolute_url(self):
-        return reverse('detail', kwargs={'pk': self.pk})
+        return reverse('detail', kwargs={'slug':self.slug})
     
 
 class Inspection(models.Model):
@@ -57,6 +67,7 @@ class Inspection(models.Model):
     date = models.DateField(blank=True,null=True)
     documentcloud_url = models.URLField(blank=True, null=True)
     state_url = models.URLField(blank=True, null=True)
+    under_appeal = models.BooleanField(default=False)
 
     def __str__(self):
         return self.slug
