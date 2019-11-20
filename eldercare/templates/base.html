@@ -8,28 +8,34 @@
         
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <link rel="stylesheet"
-            href="https://eldercare-vt-static.s3.amazonaws.com/css/style.css">
+        <link rel="stylesheet" href="http://eldercare-vt-static.s3.amazonaws.com/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://eldercare-vt-static.s3.amazonaws.com/css/style.css">
 
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+        <script src="http://eldercare-vt-static.s3.amazonaws.com/js/jquery-3.4.1.slim.min.js">
+        </script>
+        <script src="http://eldercare-vt-static.s3.amazonaws.com/js/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
-        <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js'></script>
-        <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css' rel='stylesheet' />
+        <script src='http://eldercare-vt-static.s3.amazonaws.com/js/mapbox-gl.js'></script>
+        <link href='http://eldercare-vt-static.s3.amazonaws.com/css/mapbox-gl.css' rel='stylesheet' />
         <link rel="stylesheet" href="https://use.typekit.net/jws1erf.css">
         <style>
-
+            
         </style>
         {% block header %}{% endblock %}
     </head>
     <body>
         <main role="main" class="flex-shrink-0">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-10 offset-lg-1 header">
-                        <h2><a href="/">Vermont Elder Care Navigator</a></h2>
+            <div class="container">
+                <div class="row main-description align-items-center">
+                    <div class="col col-xs-4 no-padding-left icon">
+                        <a href="/" class="icon-link"></a>
+                    </div>
+                    <div class="col-10 col-xs-8">
+                        <h2>Vermont Elder Care Navigator</h2>
+                        <p>Search our directory of state-regulated residential care homes and assisted living residences
+                            for citations and complaints
+                        </p>
                     </div>
                 </div>
                 <div class="row">
