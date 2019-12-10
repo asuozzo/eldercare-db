@@ -24,7 +24,7 @@ class Facility(models.Model):
     address = models.CharField(max_length=200)
     town = models.CharField(max_length=200)
     county = models.CharField(max_length=200)
-    in_business = models.BooleanField(blank=True, null=True)
+    in_business = models.BooleanField(blank=True, null=True,default=True)
     accs = models.BooleanField(default=False)
     erc = models.BooleanField(default=False)
     notes = models.TextField(blank=True)
@@ -41,7 +41,7 @@ class Facility(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        value = self.name + self.id_num
+        value = self.name +"-"+ self.id_num
         self.slug = slugify(value, allow_unicode=True)
         super().save(*args, **kwargs)
     
@@ -123,7 +123,7 @@ class Penalty(models.Model):
         blank=True, null=True
     )
     date = models.DateField()
-    penalty = models.IntegerField(blank=True, null=True)
+    penalty =models.DecimalField(max_digits=7,decimal_places=2,null=True, blank=True)
 
     def __str__(self):
         return ("{0}-{1}".format(self.facility, self.date))
