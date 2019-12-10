@@ -4,7 +4,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 import json
 import pandas as pd
 from django.db import models
-from bakery.views import BuildableDetailView, BuildableListView
+from bakery.views import BuildableDetailView, BuildableListView, BuildableTemplateView
 
 from .models import Facility, Complaint
 
