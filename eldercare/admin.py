@@ -8,8 +8,8 @@ from .models import (
 
 # Register your models here.
 class FacilityAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug','care_type', 'capacity', 'town', 'county','score')
-    search_fields = ('name',)
+    list_display = ('name', 'formername','slug','care_type', 'capacity', 'town', 'county','score')
+    search_fields = ('name','formername')
 
 admin.site.register(Facility, FacilityAdmin)
 
@@ -38,7 +38,11 @@ class PenaltyAdmin(admin.ModelAdmin):
 admin.site.register(Penalty, PenaltyAdmin)
 
 class CitationAdmin(admin.ModelAdmin):
-    list_display = ('citation_num', 'inspection', 'severity_scope')
+    list_display = ('citation_num','facility','get_date', 'severity_scope')
+    list_filter = ('facility',)
+
+    def get_date(self, obj):
+        return obj.inspection.date
 
 admin.site.register(Citation, CitationAdmin)
 
