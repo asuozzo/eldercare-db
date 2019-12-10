@@ -31,6 +31,8 @@ class Command(BaseCommand):
                 if Citation.objects.filter(inspection=inspection,citation_num=citation_num).exists():
                     pass
                     # print("skipping, {0} - {1} already exists".format(slug, citation_num))
+                elif inspection.under_appeal:
+                    pass
                 else:
                     citation = Citation.objects.create(
                         facility=facility,
