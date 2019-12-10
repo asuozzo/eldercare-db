@@ -3,7 +3,7 @@ from django.views.generic import TemplateView
 
 from eldercare.views import (
     FacilityListView,
-    FacilityDetailView
+    FacilityDetailView,
 )
 
 urlpatterns = [
