@@ -1,42 +1,50 @@
 <!DOCTYPE html>
 <html>
     <head>
+
         <meta charset="utf-8">
-        <title>{% block title %}{% endblock %} - Elder Care</title>
+        {% block meta %}{% endblock %}
         {% load static %}
-        <meta name="robots" content="noindex">
         
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-322822-27"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
+
+            gtag('config', 'UA-322822-27');
+        </script>
+
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
-        <link rel="stylesheet" href="http://eldercare-vt-static.s3.amazonaws.com/css/bootstrap.min.css">
+        <link rel="stylesheet"
+            href="{% static 'css/bootstrap.min.css' %}">
         <link rel="stylesheet" href="https://eldercare-vt-static.s3.amazonaws.com/css/style.css">
-
-        <script src="http://eldercare-vt-static.s3.amazonaws.com/js/jquery-3.4.1.slim.min.js">
-        </script>
-        <script src="http://eldercare-vt-static.s3.amazonaws.com/js/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
-        <script src='http://eldercare-vt-static.s3.amazonaws.com/js/mapbox-gl.js'></script>
-        <link href='http://eldercare-vt-static.s3.amazonaws.com/css/mapbox-gl.css' rel='stylesheet' />
-        <link rel="stylesheet" href="https://use.typekit.net/jws1erf.css">
-        <style>
-            
-        </style>
+        
         {% block header %}{% endblock %}
     </head>
     <body>
         <main role="main" class="flex-shrink-0">
             <div class="container">
-                <div class="row main-description align-items-center">
-                    <div class="col col-xs-4 no-padding-left icon">
-                        <a href="/" class="icon-link"></a>
+                <div class="row main-description">
+                    <div class="col-lg-10 offset-lg-1">
+                        <div class="row align-items-center">
+                            <div class="col col-xs-4 no-padding-left icon">
+                                <a href="/" class="icon-link"></a>
+                            </div>
+                            <div class="col-10 col-xs-8">
+                                <h2>Vermont Eldercare Navigator</h2>
+                                <p class="author">
+                                    By <a href="https://www.sevendaysvt.com/author/andrea-suozzo" target="_blank">Andrea Suozzo</a> of <em><a href="https://www.sevendaysvt.com" target="_blank">Seven Days</a></em>
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-10 col-xs-8">
-                        <h2>Vermont Elder Care Navigator</h2>
-                        <p>Search our directory of state-regulated residential care homes and assisted living residences
-                            for citations and complaints
-                        </p>
-                    </div>
+                    
                 </div>
                 <div class="row">
                     <div class="col-lg-10 offset-lg-1 body">
@@ -44,33 +52,52 @@
                     </div>
                 </div>
             </div>
+            <div class="row pt-5">
+                <div class="col text-center font-italic">
+                    Last updated November 26, 2019
+                </div>
+            </div>
         </main>
         <footer role="footer" class="footer">
             <div class="container-fluid">
                 <div class="row justify-content-center">
-                    <p>This service brought to you by
-                        <a href="https://www.sevendaysvt.com/"
-                            target="_blank">Seven Days</a>
-                        <span>Vermont's Independent Voice</span>
-                    </p>
-                </div>
-                <div class="row justify-content-center">
                     <ul>
                         <li>
-                            <a href="" target="_blank">Contact Us</a>
+                            <a href="mailto:eldercare@sevendaysvt.com" target="_blank">Share a story</a>
                         </li>
                         <li>
-                            <a href="" target="_blank">Send us a tip</a>
+                            <a href="https://dlp.vermont.gov/make-report" target="_blank">Make a complaint</a>
+                        </li>
+                        <li>
+                            <a href="https://dlp.vermont.gov/make-report" target="_blank">Report elder abuse</a>
                         </li>
                     </ul>
                 </div>
+                <div class="row justify-content-center text-center">
+                    <p>This service brought to you by</p>
+                </div>
                 <div class="row justify-content-center">
-                    <div class="copyright-notice" style="padding-bottom: 0px;">
-                        © <script>document.write(new Date().getFullYear());</script> Da Capo Publishing, Inc. — 255 S Champlain St. Ste 5, Burlington, Vermont 05401
+                    <a href="https://www.sevendaysvt.com" target="_blank">
+                        <div class="col-sm-6 col-xs-12 logo seven-days text-hide">
+                            Seven Days
+                        </div>
+                    </a>
+                    <a href="https://www.vpr.org" target="_blank">
+                    <div class="col-sm-6 col-xs-12 logo vpr text-hide">
+                        Vermont Public Radio
                     </div>
+                    </a>
                 </div>
             </div>
         </footer>
+        <link rel="stylesheet" href="https://use.typekit.net/jws1erf.css">
+        <script src="https://kit.fontawesome.com/48476823f7.js" crossorigin="anonymous"></script>
+        <script src="{% static 'js/jquery-3.4.1.slim.min.js' %}"></script>
+        <script src="{% static 'js/popper.min.js' %}" defer></script>
+        <script src="{% static 'js/bootstrap.min.js' %}" defer></script>
+        
+         <script src="{% static 'js/mapbox-gl.js' %}"></script>
+         <link href="{% static 'css/mapbox-gl.css' %}" rel='stylesheet' />
         {% block footerscripts %}{% endblock %}
     </body>
 </html>

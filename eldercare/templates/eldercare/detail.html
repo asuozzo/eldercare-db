@@ -1,71 +1,74 @@
 {% extends 'base.html' %}
+{% block meta %}
+<title>{{facility.name}} - Vermont Eldercare Navigator</title>
+<meta property="og:title" content="{{facility.name}} - Vermont Eldercare Navigator" />
 
-{% block title %}{{facility.name}}{% endblock %}
+<link rel="icon" type="image/x-icon" href="https://eldercare-vt-static.s3.amazonaws.com/img/favicon.ico" />
+
+<meta name="description"
+    content="Search our directory of Vermont’s residential care homes and assisted living residences for citations and complaints reported between 2014 and 2019.">
+<meta property="og:description"
+    content="Search our directory of Vermont’s residential care homes and assisted living residences for citations and complaints reported between 2014 and 2019.">
+
+<meta property="og:image" content="https://eldercare-vt-static.s3.amazonaws.com/img/share-WFC.png" />
+
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://eldercare.sevendaysvt.com/{{facility.slug}}" />
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@sevendaysvt">
+<meta name="twitter:creator" content="@asuozzo">
+<meta name="twitter:title" content="{{facility.name}} - Vermont Eldercare Navigator">
+<meta name="twitter:description"
+    content="Search our directory of Vermont’s residential care homes and assisted living residences for citations and complaints reported between 2014 and 2019.">
+<meta name="twitter:image"
+    content="https://eldercare-vt-static.s3.amazonaws.com/img/share-WFC.png">
+
+{% endblock %}
 
 {% block header %}
-
-<script src="http://eldercare-vt-static.s3.amazonaws.com/js/d3.v4.min.js"></script>
-<script src="https://kit.fontawesome.com/48476823f7.js" crossorigin="anonymous"></script>
 <style>
-    .axis path,
-    .axis line {
-        fill: none;
-        stroke: #000;
-        shape-rendering: crispEdges;
-    }
-
-    .axis text {
-        font: 10px sans-serif;
-    }
-
-    .cells path {
-        fill: none;
-        pointer-events: all;
-    }
-
-    .cells circle {
-        stroke-width: .4;
-        stroke:lightgray;
-    }
-    svg .annotation {
-        stroke-dasharray:4;
-        stroke:rgb(99, 99, 99);
-    }
-    svg text {
-        fill:rgb(99, 99, 99);
-        font-family:sans-serif;
-        font-size:.8em;
-    }
-    /* #facilityScores {
-        height:100px;
-    }
-    @media only screen and (max-width: 480px){
-        #facilityScores {
-            height:300px;
-        }
-    } */
-    
+.inspection-row {
+    cursor: pointer;
+}
 </style>
 {% endblock %}
 
 {% block content %}
 {% load static %}
 {% load humanize %}
-<div class="row facility-header">
-    <div class="col-md-10 col-xs-8">
-        <h1>{{object.name}}{% if facility.formername %} <span style="facility-formername">(Formerly {{facility.formername}})</span>{% endif %}{% if facility.closedate %} <span
-                style="facility-status">(Closed {{facility.closedate|date:"F Y"}})</span>{% elif facility.opendate %}
-                <span
-                style="facility-status">(Opened {{facility.opendate|date:"F Y"}})</span>{% endif %}</h1>
-        <h2 class="type">{{facility.care_type}}{% if facility.level %} - Level {{facility.level}}{% endif %}</h2>
+<div class="row methodology">
+    <div class="col-md-12 col-xs-12">
+        <a id="methodologyToggle" class="modal-link" data-toggle="modal" data-target="#methodology">Methodology</a>
     </div>
-    <div class="col-md-2 col-xs-4">
-        <a id="methodologyToggle" data-toggle="modal" data-target="#methodology">Methodology</a>
+</div>
+<div class="row facility-header">
+    <div class="col-md-12 col-xs-12">
+        <h1>{{object.name}}{% if facility.formername %} <span class="facility-status formername">(Formerly {{facility.formername}})</span>{% endif %}{% if facility.closedate %} <span
+                class="facility-status closed">(Closed {{facility.closedate|date:"F Y"}})</span>{% elif facility.opendate %}
+                <span
+                class="facility-status open">(Opened {{facility.opendate|date:"F Y"}})</span>{% endif %}</h1>
+        <h2 class="type">
+            {{facility.care_type}}{% if facility.level %} - Level {{facility.level}}{% endif %} 
+            <span class="caretype-explainer" 
+                data-toggle="popover"
+                data-trigger="hover"
+            {% ifequal facility.care_type 'Residential Care Home' %}
+                data-content='<b>Residential care homes</b> provide room, board and care in a home-like living environment for "persons unable to live wholly independently but not in need of the level of care and services provided in a nursing home."<br> 
+                <b>Level 4</b> homes must provide room and board, assistance with personal care, general supervision, and medication management, if needed.<br>
+                <b>Level 3</b> homes must provide all of the above, plus nursing services for residents.'
+            {% else %}
+                data-content='<b>Assisted living residences</b> offer private living spaces that include a bedroom and bathroom, with access to living space
+                and a kitchen. These facilities also offer health and supportive services. They are subject to all the regulations under
+                which residential care facilities operate, plus additional assisted living-specific regulations.'
+            {% endifequal %}
+        ><i class="fas fa-info-circle"></i></span>
+        </h2>
     </div>
 </div>
 <div class="row facility-details">
     <div class='col-md-5 col-lg-4 col-xl-3'>
-        <div id="map" style="min-height:200px;height:100%;width:100%;"></div>
+        <div id="map" class="detail-map" style="min-height:200px;height:100%;width:100%;"></div>
     </div>
     <div class='col-md'>
         <div class="address">
@@ -80,7 +83,7 @@
             <div class="data-item">{{facility.capacity}}</div>
         </div>
         <div class="penalties data-container">
-            <div class="data-header">Penalties</div>
+            <div class="data-header">Fines</div>
             <div class="data-item">
                 ${{tot_penalties|intcomma}}
             </div>
@@ -90,35 +93,59 @@
         <div class="row">
             <div class="col-12">
                 <div class="data-header">Annual citations</div>
-                <svg id="year-chart" width="100%" height="200"></svg>
+                <div id="year-chart-container">
+                    <div class="year-tooltip hidden"></div>
+                    <svg id="year-chart" width="100%" height="200"></svg>
+                </div>
+                
             </div>
         </div>
     </div>
 </div>
 <div class="row facility-scores">
     <div class="col-xl d-block">
-        <div class="data-header">Cumulative facility violation scores since January 2014</div>
-        <svg id="facilityScores" width="100%" height="150">
-            <defs>
-                <marker id="arrow" markerUnits="strokeWidth" markerWidth="7" markerHeight="7" viewBox="0 0 12 12"
-                    refX="6" refY="6" orient="auto">
-                    <path d="M2,2 L10,6 L2,10 L6,6 L2,2" style="fill: #000;"></path>
-                </marker>
-            </defs>
-        </svg>
+        <div class="row">
+            <div class="data-header col-sm-8">Average annual facility violation scores</div>
+            <div class="col-sm-4 col-md-4 text-right"><a id="chartMethodologyToggle" class="modal-link" data-toggle="modal"
+                    data-target="#chartMethodology">Chart methodology</a></div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <svg id="facilityScores" width="100%" height="150">
+                    <defs>
+                        <marker id="arrow" markerUnits="strokeWidth" markerWidth="7" markerHeight="7"
+                            viewBox="0 0 12 12" refX="6" refY="6" orient="auto">
+                            <path d="M2,2 L10,6 L2,10 L6,6 L2,2" style="fill: #000;"></path>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+        </div>
     </div>
 </div>
 <div class="row facility-complaints">
     <div class="col-xl d-block">
         <h5>Complaints</h5>
-        <p>Between January 1, 2014, and April 4, 2019, {{facility.name}} received <span class="highlight complaint">{{complaints_count}}</span>
-            complaints. The Division of Licensing and Protection found that <span
-                class="highlight substantiated">{{substantiated_count}}</span> {% if substantiated_count == 1 %}was{% else %}were{% endif %} substantiated.</p>
+        <p>Between January 1, 2014, and April 4, 2019, {{facility.name}} received <span class="highlight complaint">{{complaints_count}}</span>&nbsp;complaints. The Division of Licensing and Protection found that <span
+                class="highlight substantiated">{{substantiated_count}}</span>&nbsp;{% if substantiated_count == 1 %}was{% else %}were{% endif %} substantiated.</p>
     </div>
 </div>
 <div class="row facility-inspections">
     <div class="col-xl d-block">
         <h5>Inspections</h5>
+        <p>
+            The state inspects facilities approximately once every two years, and additionally as complaints or incident
+            reports from facilities dictate. Inspection reports detail each instance when a home was not in line with
+            regulations. Each such finding counts as a citation against the facility; citations are assigned a letter
+            grade to indicate the severity and scope of the violation.
+        </p>
+        <p>
+            {% if facility.opendate %}Since {{facility.opendate|date:"Y"}}{% elif facility.closedate %}Between 2014 and
+            {{facility.closedate|date:"Y"}}{% else %}Since 2014{% endif %}, the state {% if not facility.closedate %}has
+            {% endif %}inspected {{facility.name}} <span
+                class="highlight inspection">{{inspections|length}}</span>&nbsp;time{% if not inspections|length == 1 %}s{% endif %}, resulting in <span
+                class="highlight citation">{{facility.citation_set.all|length}}</span>&nbsp;citation{% if not facility.citation_set.all|length == 1 %}s{% endif %}.
+        </p>
         <table class="table">
             <thead>
                 <tr>
@@ -129,23 +156,30 @@
             </thead>
             <tbody>
                 {% for inspection in inspections %}
-                <tr {% if inspection.citation_set.all %}data-toggle="collapse" data-target="#inspection{{inspection.id}}"{% endif %}
-                    class="clickable collapsed">
+                <tr {% if inspection.citation_set.all %}data-toggle="collapse"
+                        data-target="#inspection{{inspection.id}}" {% endif %}
+                    class="inspection-row clickable collapsed">
                     <td class="collapse-icon">{% if inspection.citation_set.all %}<i class="fa" aria-hidden="true"></i>{% endif %}</td>
-                    <td class="align-left">{{inspection.date}}</td>
-                    <td>{{inspection.citation_set.all|length}}</td>
+                    {% if inspection.under_appeal %}
+                        <td colspan="2">{{inspection.date}} - <span class="inspection-appeal">Under appeal</span></td>
+                    {% else %}
+                        <td class="align-left">{{inspection.date}}</td>
+                        <td>{{inspection.citation_set.all|length}}</td>
+                    {% endif %}
                     <!-- <td></td> -->
                 </tr>
                 <tr>
                     <td colspan="4" class="sub-table">
                         {% if inspection.citation_set.all %}
                         <div id="inspection{{inspection.id}}" class="citations-detail collapse">
+                            <div><a id="ssGridToggle" class="modal-link" data-toggle="modal" data-target="#ssGrid">What do the letters mean?</a>
+                            </div>
                             <table class="table">
                                 {% for citation in inspection.citation_set.all %}
                                     <tr>
                                         <td>{{citation.citation_num}}</td>
                                         <td>{{citation.citation_type}} > {{citation.citation_subtype}}</td>
-                                        <td class="text-center">
+                                        <td class="text-center ss-container">
                                             <div class="ss {{citation.severity_scope.letter}}" 
                                                  data-toggle="popover"
                                                  data-trigger="hover"
@@ -158,6 +192,7 @@
                                     </tr>
                                 {% endfor %}
                             </table>
+                            
                             <a href="{{inspection.documentcloud_url}}" target="_blank">Read the full inspection report</a>
                         </div>
                         {% endif %}
@@ -168,24 +203,397 @@
         </table>
     </div>
 </div>
-<div class="modal fade" id="methodology" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
+
+<div class="modal fade" id="ssGrid" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="methodologyLabel">Our methodology</h5>
+                <h4 class="modal-title" id="methodologyLabel">Citation Severity and Scope Grid</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                xxx
+                <p>
+                    Vermont's Division of Licensing and Protection uses this grid to assign a severity and scope value
+                    to each violation it issues during an inspection. The grid system and definitions come from the
+                    Centers for Medicare & Medicaid Services, which utilizes the system for nursing home inspections.
+                </p>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th colspan="3" class="text-center">Scope</th>
+                        </tr>
+                        <tr>
+                            <th>Severity</th>
+                            <th>Isolated</th>
+                            <th>Pattern</th>
+                            <th>Widespread</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="align-middle">Immediate jeopardy to resident health or safety</td>
+                            <td class="text-center">
+                                <div class="ss-letter">J</div>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">K</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">L</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="align-middle">Actual harm that is not immediate jeopardy</td>
+                            <td class="text-center">
+                                <p class="ss-letter">G</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">H</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">I</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="align-middle">No actual harm with potential for more than minimal harm that is
+                                not immediate jeopardy</td>
+                            <td class="text-center">
+                                <p class="ss-letter">D</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">E</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">F</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="align-middle">No actual harm with potential for minimal harm</td>
+                            <td class="text-center">
+                                <p class="ss-letter">A</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">B</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">C</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="methodology" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="methodologyLabel">Our methodology</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    <em>Seven Days</em> and Vermont Public Radio compiled regulatory complaints, inspection reports and
+                    fines assessed by Vermont’s Department of Disabilities, Aging and Independent Living for every
+                    residential care home and assisted living residence operating in the state since January 1, 2014.
+                </p>
+                <h5>
+                    Complaints
+                </h5>
+                <p>
+                    Anyone can <a href="https://dlp.vermont.gov/survey-cert/sc-complaints">report a concern about a
+                    facility</a> to the Division of Licensing and Protection’s survey and certification complaint
+                    system. In most instances, inspectors make an unannounced visit to the facility to determine
+                    whether allegations are substantiated or unsubstantiated.
+                </p>
+                <p>
+                    Unsubstantiated reports are exempt from disclosure under the Public Records Act. So are residents’
+                    identities and medical details. Many of the complaint documents we received were partially or nearly
+                    entirely redacted.
+                </p>
+                <p>
+                    For this database, we summarized the total number of allegations, and the total number that were
+                    substantiated, for each facility. For clarity, we considered each individual allegation to be one
+                    “complaint.”
+                </p>
+                <h5>
+                    Inspections
+                </h5>
+                <p>
+                    Inspection reports detail each instance when a home was not in line with regulations. Each such
+                    finding counts as a citation against the facility. Citations are assigned a letter grade to indicate
+                    the severity and scope of the violation.
+                </p>
+                <p>
+                    The federal Centers for Medicare & Medicaid Services uses the same severity and scope grading system
+                    to calculate scores for every nursing home in the U.S., calculating a rating from one to five stars.
+                </p>
+                <p>
+                    Vermont residential care and assisted living facilities are subject to a similar assessment
+                    framework — and the same severity and scope letter assessments. The state posts inspection reports
+                    online, but our records requests revealed gaps. Of the 794 facility inspections between January 1,
+                    2014, and September 30, 2019, 150 — nearly 20 percent — were never posted to its website.
+                </p>
+                <p>
+                    To compile the citation data, we downloaded inspection documents available on the state’s website,
+                    matched them up with a list of all inspections conducted since January 2014 and requested the ones
+                    that were missing. We manually recorded each citation and the letter grade associated with it, then
+                    digitally “mapped” those citations to their respective sections of the state regulations. The
+                    result: a dataset that allowed us to determine the citations issued most frequently, the range of
+                    severity grades of the citations facilities received and which homes repeatedly failed to comply
+                    with state regulations.
+                </p>
+                <p>
+                    To convert those letters to violation severity scores, we assigned point values according to the
+                    scoring system that the Centers for Medicare & Medicaid Services uses, where A, B and C count for
+                    zero points, and L counts for 150.
+                </p>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th colspan="3" class="text-center">Scope</th>
+                        </tr>
+                        <tr>
+                            <th>Severity</th>
+                            <th>Isolated</th>
+                            <th>Pattern</th>
+                            <th>Widespread</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="align-middle">Immediate jeopardy to resident health or safety</td>
+                            <td class="text-center">
+                                <p class="ss-letter">J</p>
+                                <p class="ss-score">50</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">K</p>
+                                <p class="ss-score">100</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">L</p>
+                                <p class="ss-score">150</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="align-middle">Actual harm that is not immediate jeopardy</td>
+                            <td class="text-center">
+                                <p class="ss-letter">G</p>
+                                <p class="ss-score">20</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">H</p>
+                                <p class="ss-score">35</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">I</p>
+                                <p class="ss-score">45</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="align-middle">No actual harm with potential for more than minimal harm that is
+                                not immediate jeopardy</td>
+                            <td class="text-center">
+                                <p class="ss-letter">D</p>
+                                <p class="ss-score">4</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">E</p>
+                                <p class="ss-score">8</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">F</p>
+                                <p class="ss-score">16</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="align-middle">No actual harm with potential for minimal harm</td>
+                            <td class="text-center">
+                                <p class="ss-letter">A</p>
+                                <p class="ss-score">0</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">B</p>
+                                <p class="ss-score">0</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">C</p>
+                                <p class="ss-score">0</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="small"><em>Source: <a
+                            href="https://www.cms.gov/Medicare/Provider-Enrollment-and-Certification/CertificationandComplianc/downloads/usersguide.pdf">Center
+                            for Medicare and Medicaid Services (PDF)</a></em></p>
+                <p>
+                    Using this scoring system, homes with several relatively minor citations do not accumulate very many
+                    violation points. Homes with a few very severe citations might accumulate hundreds of points.
+                </p>
+                <p>
+                    To adjust for facilities that have opened or closed since 2014, we calculated the number of years of
+                    our time window that each facility was open, then divided each facility’s cumulative point total by
+                    the number of years. We used “1” for any facility that opened within the past year. This allowed us
+                    to calculate an average number of violation points that each facility accumulated per year it was
+                    open.
+                </p>
+                <p>
+                    That figure determines a facility’s position on the Average Annual Facility Violation Scores graphic
+                    on the database.
+                </p>
+                
+                <h5>Fines</h5>
+                <p>
+                   The Division of Licensing and Protection can fine homes that repeatedly fail to come in line with
+                   regulations. We requested all fines that the state imposed from 2014 through November 19, 2019. The state issued
+                   six fines, totaling $86,989, to six facilities. The largest fine, for $70,590, was to Maple Ridge
+                   Memory Care in Essex Junction in 2017; the smallest, for $600, was to Thompson Residential Home in
+                   Brattleboro, also in 2017.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="chartMethodology" tabindex="-1" role="dialog"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="methodologyLabel">Facility chart methodology</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Vermont residential care and assisted living facilities are subject to inspections to determine
+                    whether they are in line with regulations. When they are not in line with regulations, they receive a citation,
+                    which gets assigned a letter grade to indicate the severity and scope of the violation.
+                </p>
+                <p>
+                    The federal Centers for Medicare & Medicaid Services uses the same severity and scope grading system
+                    to calculate scores for every nursing home in the U.S., calculating a rating from one to five stars.
+                </p>
+                <p>
+                    To compile citation data for inspections since January 1, 2014, we manually recorded each citation 
+                    and the letter grade associated with it, then digitally “mapped”
+                    those citations to their respective sections of the state regulations. The result: a dataset that
+                    allowed us to determine the citations issued most frequently, the range of severity grades of the
+                    citations facilities received and which homes repeatedly failed to comply with state regulations.
+                </p>
+                <p>
+                    To convert those letters to violation severity scores, we assigned point values according to the
+                    scoring system that the Centers for Medicare & Medicaid Services uses, where A, B and C count for
+                    zero points, and L counts for 150.
+                </p>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th colspan="3" class="text-center">Scope</th>
+                        </tr>
+                        <tr>
+                            <th>Severity</th>
+                            <th>Isolated</th>
+                            <th>Pattern</th>
+                            <th>Widespread</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="align-middle">Immediate jeopardy to resident health or safety</td>
+                            <td class="text-center">
+                                <p class="ss-letter">J</p>
+                                <p class="ss-score">50</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">K</p>
+                                <p class="ss-score">100</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">L</p>
+                                <p class="ss-score">150</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="align-middle">Actual harm that is not immediate jeopardy</td>
+                            <td class="text-center">
+                                <p class="ss-letter">G</p>  
+                                <p class="ss-score">20</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">H</p>
+                                <p class="ss-score">35</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">I</p>
+                                <p class="ss-score">45</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="align-middle">No actual harm with potential for more than minimal harm that is
+                                not immediate jeopardy</td>
+                            <td class="text-center">
+                                <p class="ss-letter">D</p>
+                                <p class="ss-score">4</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">E</p>
+                                <p class="ss-score">8</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">F</p>
+                                <p class="ss-score">16</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="align-middle">No actual harm with potential for minimal harm</td>
+                            <td class="text-center">
+                                <p class="ss-letter">A</p>
+                                <p class="ss-score">0</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">B</p>
+                                <p class="ss-score">0</p>
+                            </td>
+                            <td class="text-center">
+                                <p class="ss-letter">C</p>
+                                <p class="ss-score">0</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    Using this scoring system, homes with several relatively minor citations do not accumulate very many
+                    violation points. Homes with a few very severe citations might accumulate hundreds of points.
+                </p>
+                <p>
+                    To adjust for facilities that have opened or closed since 2014, we calculated the number of years of
+                    our time window that each facility was open, then divided each facility’s cumulative point total by
+                    the number of years. We used “1” for any facility that opened within the past year. This allowed us
+                    to calculate an average number of violation points that each facility accumulated per year it was
+                    open.
+                </p>
+                <p>
+                    That figure determines a facility’s position on the facility violation scores chart.
+                </p>
+
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
 {% block footerscripts %}
+<script src="{% static 'js/d3.v4.min.js' %}"></script>
 <script>
     // citation chart setup
     var citations = {{citation_type_json|safe}};
@@ -206,7 +614,10 @@
     $('#methodologyToggle').on('shown.bs.modal', function () {
         $('#methodology').trigger('focus')
     })
+    $('#chartMethodologyToggle').on('shown.bs.modal', function () {
+    $('#chartMethodology').trigger('focus')
+    })
 </script>
 
-<script src="{% static 'js/charts.js' %}"></script>
+<script src="{% static 'eldercare/js/charts.js' %}"></script>
 {% endblock %}

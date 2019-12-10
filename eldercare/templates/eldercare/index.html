@@ -1,9 +1,32 @@
 {% extends 'base.html' %}
-{% block title %}Home{% endblock %}
+{% block meta %}
+    <title>Vermont Eldercare Navigator</title>
+    <meta property="og:title" content="Vermont Eldercare Navigator - Search for Vermont residential care homes and assisted living residences" />
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}" />
+
+    <meta name="description"
+        content="Search our directory of Vermont’s residential care homes and assisted living residences for citations and complaints reported between 2014 and 2019.">
+    <meta property="og:description"
+        content="Search our directory of Vermont’s residential care homes and assisted living residences for citations and complaints reported between 2014 and 2019.">
+    
+    <meta property="og:image" content="{% static 'img/share-WFC.png' %}" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://eldercare.sevendaysvt.com/" />
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@sevendaysvt">
+    <meta name="twitter:creator" content="@asuozzo">
+    <meta name="twitter:title" content="Vermont Eldercare Navigator">
+    <meta name="twitter:description"
+        content="Search our directory of Vermont’s residential care homes and assisted living residences for citations and complaints reported between 2014 and 2019.">
+    <meta name="twitter:image" content="https://eldercare-vt-static.s3.amazonaws.com/img/share-WFC.png">
+    {% endblock %}
 
 {% block header %}
+<script src="https://unpkg.com/@babel/polyfill/browser.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <style>
   [v-cloak] {
   display: none;
@@ -20,28 +43,51 @@
 <div id="app">
     <div class="row header-text">
         <div class="col-12">
+            <p class="intro">Search our directory of Vermont residential care homes and assisted living residences for citations and complaints reported between 2014 and 2019.
+            </p>
             <p>
-                Forty federally regulated nursing homes operate in Vermont. But 137 other state-regulated residential
-                care homes and assisted living residences provide a stepped-down level of care. Inspectors with
-                Vermont’s Department of Disabilities, Aging and Independent Living visit them once every two years, or
-                more frequently when complaints are filed. Inspectors cite homes for violations including paperwork
-                problems, cleanliness, medication management, and failure to protect a resident from abuse or neglect.
+                In Vermont, 133 state-regulated residential care homes<span class="caretype-explainer"
+                    data-placement="top" data-toggle="popover" data-trigger="hover"
+                    data-content='<b>Residential care homes</b> offer personal care, general supervision, and medication
+                    management for seniors who shouldn’t live on their own. Some also provide "nursing overview."'><i
+                        class="fas fa-info-circle"></i>&nbsp;</span> and assisted living
+                residences<span class="caretype-explainer" data-toggle="popover"
+                    data-trigger="hover" data-placement="top"
+                    data-content="<b>Assisted living residences</b> provide various services that support residents'
+                    continued independence. Seniors get a private bedroom, a bath and a lockable door."><i
+                        class="fas fa-info-circle"></i>&nbsp;</span> care for seniors. Inspectors with Vermont’s
+                        Department of
+                        Disabilities, Aging and Independent Living (DAIL) visit them once every two years, or more frequently
+                        when complaints are filed. Inspectors cite homes for violations including paperwork problems,
+                        cleanliness, medication management, and failure to protect a resident from abuse or neglect.
+                </p>
+
+                <p>
+                    DAIL posts many of the inspections on its website. We’ve digitized all 794 inspections conducted
+                    between January 1, 2014, and September 30, 2019, and made the data available in a public database.
+                    Search for a facility or town, or filter by county or residence type, to find out more about each
+                    facility. You’ll also find the number of complaints per facility — and whether the state considered
+                    them founded.
+            </p>
+            <p>
+                Five facilities that operated since 2014 have closed; their data is also included.
             </p>
 
-                <p>DAIL posts many of the inspections on its website. We’ve digitized all 794 inspections conducted
-                between January 1, 2014 and September 30, 2019 and made the data available in a public database. Search for a
-                facility, town, or filter by county or residence type to find out more about each facility. You’ll also
-                find the number of complaints per facility — and whether the state considered them founded.</p>
-
-                <p>To look up data on nursing homes — which are federally regulated — visit <a
+                <p>In addition, 40 federally regulated nursing homes operate in Vermont, but they are not included here.
+                    To look up data on nursing homes, visit <a
                     href="https://www.medicare.gov/nursinghomecompare/search.html?">Nursing Home Compare</a>.</p>
 
-                <p class="small"><i>Note: Most, but not all, residential care facilities serve elder populations; some primarily or
-                additionally serve people with disabilities.</i></p>
+            <p class="story-link"><a href="https://www.sevendaysvt.com/eldercare"
+                    target="_blank"><i class="fas fa-arrow-circle-right"></i> Read the investigative series based on this
+                    database
+                    here.</a></p>
+
+                <p class="small"><em>Note: Most, but not all, residential care facilities serve elder populations; some primarily or
+                additionally serve people with disabilities.</em></p>
         </div>
     </div>
     <div class="row filters">
-        <div class="col-md-6">
+        <div class="col-md-6 col-sm-8 col-xs-12">
             <div class="form-group">
                 <input type="text" class="form-control" v-model="search" placeholder="Search for a facility or town">
             </div>
@@ -67,19 +113,22 @@
             </div>
             <div class="form-group">
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="alr-select" v-model="alr">
-                    <label class="form-check-label" for="alr-select">Assisted Living Residences</label>
+                    <input class="form-check-input" type="checkbox" id="rch-select" v-model="rch">
+                    <label class="form-check-label" for="rch-select"><span class="facility-key rch-key"></span>&nbsp;Residential Care Facilities</label>
+                    
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="rch-select" v-model="rch">
-                    <label class="form-check-label" for="rch-select">Residential Care Facilities</label>
+                    <input class="form-check-input" type="checkbox" id="alr-select" v-model="alr">
+                    <label class="form-check-label" for="alr-select"><span class="facility-key alr-key"></span>&nbsp;Assisted Living Residences</label>
+                   
                 </div>
+                
             </div>
             <div class="form-group">
                 <button type="button" class="btn btn-light" v-on:click="resetFilters">Reset all filters</button>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 col-sm-4 search-map col-xs-12">
             <mapbox-map :facilities="filteredFacilities"></mapbox-map>
         </div>
     </div>
@@ -115,7 +164,9 @@
 {% endblock %}
 
 {% block footerscripts %}
+<script src="{% static 'js/vue.min.js' %}"></script>
 <script type='text/javascript'>
+
 
     var facilities = {{facilities_json|safe}};
 
@@ -133,6 +184,7 @@
         },
         template: '<div class="mapbox-map" id="mapbox-map"></div>',
         mounted: function(){
+            var _this = this;
             this.map = new mapboxgl.Map({
                 container: 'mapbox-map',
                 style: 'mapbox://styles/mapbox/light-v10',
@@ -144,40 +196,44 @@
             this.map.scrollZoom.disable();
             this.map.addControl(new mapboxgl.NavigationControl());
 
-            this.facilities.forEach((facility) => {
-                var el = document.createElement('div');
-                el.className = 'marker';
-                if (facility.type== "Assisted Living Residence"){
-                    el.className += ' alr-marker'
-                } else {
-                    el.className += ' rch-marker'
-                }
-                el.setAttribute("id", "marker"+facility.id)
-                
-                let marker = new mapboxgl.Marker(el)
-                    .setLngLat([facility.lon, facility.lat])
-                    .setPopup(new mapboxgl.Popup({ offset: 25, closeOnClick:true,closeButton:false }) // add popups
-                    .setHTML('<span class="marker-title">' + facility.name + '</span>'))
-                    .addTo(this.map);
+            this.facilities.forEach(function (facility) {
+            var el = document.createElement('div');
+            el.className = 'marker';
 
-                this.markerArray.push({
-                    id:facility.id,
-                    coords:[facility.lon, facility.lat]
-                })
+            if (facility.type == "Assisted Living Residence") {
+                el.className += ' alr-marker';
+            } else {
+                el.className += ' rch-marker';
+            }
+
+            el.setAttribute("id", "marker" + facility.id);
+            var marker = new mapboxgl.Marker(el).setLngLat([facility.lon, facility.lat]).setPopup(new mapboxgl.Popup({
+            offset: 25,
+            closeOnClick: true,
+            closeButton: false
+            }) // add popups
+            .setHTML('<span class="marker-title">' + facility.name + '</span>')).addTo(_this.map);
+
+            _this.markerArray.push({
+            id: facility.id,
+            coords: [facility.lon, facility.lat]
+            });
             });
         },
         watch:{
-            'facilities'(){                
+            'facilities': function facilities() {
+                var _this2 = this;
                 this.$emit('update:facilities',this.facilities);
 
                 var bounds = new mapboxgl.LngLatBounds();
                 $(".marker").hide();
-                this.facilities.forEach((facility)=>{
-                    let marker = this.markerArray.find(function(marker){
-                        return marker.id == facility.id
-                    });
-                    bounds.extend(marker.coords);
-                    $("#marker"+facility.id).show()
+                this.facilities.forEach(function (facility) {
+                var marker = _this2.markerArray.find(function (marker) {
+                return marker.id == facility.id;
+                });
+
+                bounds.extend(marker.coords);
+                $("#marker" + facility.id).show();
                 });
                 if(bounds._ne){
                     this.map.fitBounds(bounds, { padding: 50,maxZoom:12 });
@@ -221,55 +277,80 @@
             }
         },
         computed: {
-            filteredFacilities() {
-                filteredFacilities = this.facilities
-                if (!this.alr){
-                    filteredFacilities=filteredFacilities.filter(facility => {
-                        if (facility.type != "Assisted Living Residence"){
-                            return facility
-                        }
-                    })
-                }
-                if (!this.rch){
-                    filteredFacilities=filteredFacilities.filter(facility => {
-                        if (facility.type != "Residential Care Home"){
-                            return facility
-                        }
-                    })
-                }
-                filteredFacilities = filteredFacilities.filter(facility => {
-                    if (this.search.length > 0){
-                        var searchList = this.search.toLowerCase().split(" ");
-                        var match = true;
-                        searchList.forEach(function(s){
-                            nameMatch = facility.name.toLowerCase().includes(s);
-                            townMatch = facility.town.toLowerCase().includes(s);
+        filteredFacilities: function (_filteredFacilities) {
+        function filteredFacilities() {
+        return _filteredFacilities.apply(this, arguments);
+        }
 
-                            if (!(nameMatch || townMatch)){
-                                match = false;
-                            }
-                        })
-                        if (match){
-                            return facility;
-                        }
-                    } else {
-                        return facility;
-                    }
-                })
-                filteredFacilities = filteredFacilities.filter(facility=>{
-                    return facility.county.includes(this.county);
-                })
-                filteredFacilities = filteredFacilities.sort((a,b) => {
-                    let modifier = 1;
-                    if(this.currentSortDir === 'desc') modifier = -1;
-                    if(a[this.currentSort] < b[this.currentSort]) return -1 * modifier;
-                    if(a[this.currentSort] > b[this.currentSort]) return 1 * modifier;
-                    return 0;
-                });
-                return filteredFacilities;
-            }
-        },
+        filteredFacilities.toString = function () {
+        return _filteredFacilities.toString();
+        };
+
+        return filteredFacilities;
+        }(function () {
+        var _this3 = this;
+
+        filteredFacilities = this.facilities;
+
+        if (!this.alr) {
+        filteredFacilities = filteredFacilities.filter(function (facility) {
+        if (facility.type != "Assisted Living Residence") {
+        return facility;
+        }
+        });
+        }
+
+        if (!this.rch) {
+        filteredFacilities = filteredFacilities.filter(function (facility) {
+        if (facility.type != "Residential Care Home") {
+        return facility;
+        }
+        });
+        }
+
+        filteredFacilities = filteredFacilities.filter(function (facility) {
+        if (_this3.search.length > 0) {
+        var searchList = _this3.search.toLowerCase().split(" ");
+
+        var match = true;
+        searchList.forEach(function (s) {
+        nameMatch = facility.name.toLowerCase().includes(s);
+        townMatch = facility.town.toLowerCase().includes(s);
+
+        if (!(nameMatch || townMatch)) {
+        match = false;
+        }
+        });
+
+        if (match) {
+        return facility;
+        }
+        } else {
+        return facility;
+        }
+        });
+        filteredFacilities = filteredFacilities.filter(function (facility) {
+        return facility.county.includes(_this3.county);
+        });
+        filteredFacilities = filteredFacilities.sort(function (a, b) {
+        var modifier = 1;
+        if (_this3.currentSortDir === 'desc') modifier = -1;
+        if (a[_this3.currentSort] < b[_this3.currentSort]) return -1 * modifier; if (a[_this3.currentSort]>
+            b[_this3.currentSort]) return 1 * modifier;
+            return 0;
+            });
+            return filteredFacilities;
+            })
+            },
     });
+
+    $(function () {
+    $('[data-toggle="popover"]').popover({
+    "html":true,
+    "trigger": "hover",
+    "container": 'body'
+    })
+    })
 
 
 </script>

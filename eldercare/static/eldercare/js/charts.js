@@ -4,6 +4,9 @@ var draw = function(){
     width = parseInt(svg.style('width')) - margin.left - margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom;
 
+    var div = d3.select("#year-chart-container").select("div.year-tooltip")
+  
+
   svg.selectAll("*").remove();
   if (Object.keys(citations).length == 0){
    citations = [{year:2014,severity_code:1,count:0}]
@@ -14,7 +17,7 @@ var draw = function(){
     var years = Array();
     for (i = start; i <= end; i++) { years.push(i) };
 
-    var keys = [3, 2, 1];
+    var keys = [4, 3, 2, 1];
 
     // reshape json
     var data = []
@@ -75,6 +78,9 @@ var draw = function(){
       .enter().append("g")
 
     bars.attr("fill", function (d) { return z(d.key); })
+      .attr("class", function(d){
+        return "severity s"+d.key;
+      })
       .selectAll("rect")
       .data(function (d) { return d; })
       .enter().append("rect")
@@ -84,7 +90,38 @@ var draw = function(){
         return x(d[0]);
       })
       .attr("width", function (d) { return x(d[1]) - x(d[0]); })
-      .attr("height", y.bandwidth());
+      .attr("height", y.bandwidth())
+      .on("mouseover", function (d) {
+        var xPosition = parseFloat(d3.select(this).attr("x")) + width / 2;
+        var yPosition = parseFloat(d3.select(this).attr("y")) / 2 + y.bandwidth() / 2;
+
+        var severity = ""
+        var sGroup = d3.select(this.parentNode);
+        if (sGroup.classed("s1")) {
+          severity = "No actual harm with potential for minimal harm"
+        } else if (sGroup.classed("s2")) {
+          severity = "No actual harm with potential for more than minimal harm that is not immediate jeopardy "
+        } else if (sGroup.classed("s3")) {
+          severity = "Actual harm that is not immediate jeopardy";
+        } else if (sGroup.classed("s4")) {
+          severity = "Immediate jeopardy to resident health or safety";
+        } else {
+          severity = 'Unknown severity'
+        }
+        var html = "<span class='data-header'>Severity</span><br>" +severity + "<br>"
+        html += "<span class='data-header'>Citations</span><br>" 
+        html += (d[1] - d[0]);
+        div.html(html);
+
+        div.style("left", xPosition + "px")
+          .style("top", yPosition + "px")
+        div.classed("hidden", false);
+        
+        }).on("mouseout", function () {
+
+          div.classed("hidden", true);
+
+        })
 
     g.append("g")
       .selectAll("text")
@@ -98,11 +135,7 @@ var draw = function(){
         return y(d.year) + y.bandwidth() / 2 + 6
       })
       .text(function (d) {
-        if (d.total > 0) {
-          return d.total
-        } else {
-          return ""
-        }
+        return d.total
       })
 
     g.append("g")
@@ -126,7 +159,7 @@ var margin = {top: 40, right: 20, bottom: 40, left: 20},
 height = scoreSvg.attr("height") - margin.top - margin.bottom;
 
 var max = d3.max(scores, function(d){return d.value;});
-  var colorScale = d3.scaleLinear().domain([0, 100, max]).range(['#fff9f7', "#d8836a",'#a51b02']);
+  var colorScale = d3.scaleLinear().domain([0, 20, max]).range(['#fff9f7', "#d8836a",'#a51b02']);
 scoreSvg.selectAll(".chart-content").remove();
 var width = parseInt(scoreSvg.style('width')) - margin.left - margin.right;
 var x = d3.scaleLinear()
@@ -230,9 +263,10 @@ var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v10',
     center: mapMarker.coords,
-    zoom: 9
+    zoom: 9,
 });
 map.scrollZoom.disable();
+map.dragPan.disable();
 
 var el = document.createElement('div');
 el.className = 'marker';
@@ -245,3 +279,5 @@ if (mapMarker.type == "Assisted Living Residence") {
 new mapboxgl.Marker(el)
     .setLngLat(mapMarker.coords)
     .addTo(map);
+
+
