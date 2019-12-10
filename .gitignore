@@ -5,3 +5,4 @@ __pycache__/
 build/*
 !build/.gitkeep
 static/*.csv
+settings.py
