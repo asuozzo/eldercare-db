@@ -1,0 +1,7 @@
+{% extends "admin/base.html" %}
+
+
+{% block userlinks %}
+<a href='{% url "buildsite" %}'>Build site</a> / <a href='{% url "publishsite" %}'>Publish to S3</a> /
+{{ block.super }}
+{% endblock userlinks %}

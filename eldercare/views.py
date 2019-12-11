@@ -6,6 +6,7 @@ import pandas as pd
 from django.db import models
 from bakery.views import BuildableDetailView, BuildableListView, BuildableTemplateView
 from django.shortcuts import redirect
+from django.contrib import messages
 
 from .models import Facility, Complaint
 
@@ -63,12 +64,15 @@ class FacilityDetailView(BuildableDetailView):
         context["tot_penalties"] = num_or_zero(facility.penalty_set.aggregate(Sum('penalty'))['penalty__sum'])
         return context
 
-# def BuildSite(request):
-#     management.call_command('build', verbosity=1)
-#     return redirect('/admin')
+def BuildSite(request):
+    management.call_command('build', verbosity=0)
+    messages.success(request, 'Build updated!')
+    return redirect('/admin/')
 
-# def PublishSite(request):
-#     pass
+def PublishSite(request):
+    management.call_command('publish', verbosity=0)
+    messages.success(request, 'Published to S3!')
+    return redirect('/admin/')
 
 
 class Year(Func):
