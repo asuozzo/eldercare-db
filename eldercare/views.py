@@ -5,8 +5,12 @@ import json
 import pandas as pd
 from django.db import models
 from bakery.views import BuildableDetailView, BuildableListView, BuildableTemplateView
+from django.shortcuts import redirect
 
 from .models import Facility, Complaint
+
+from django.core import management
+
 
 class FacilityListView(BuildableListView):
     model = Facility
@@ -58,6 +62,13 @@ class FacilityDetailView(BuildableDetailView):
         context["substantiated_count"] = facility.allegation_set.filter(substantiation="Substantiated").count()
         context["tot_penalties"] = num_or_zero(facility.penalty_set.aggregate(Sum('penalty'))['penalty__sum'])
         return context
+
+# def BuildSite(request):
+#     management.call_command('build', verbosity=1)
+#     return redirect('/admin')
+
+# def PublishSite(request):
+#     pass
 
 
 class Year(Func):
