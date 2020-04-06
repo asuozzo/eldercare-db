@@ -6,7 +6,7 @@ import os
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        key = 'AIzaSyBX11djWfV1cYyyV388n7-GUGoxxus3YNs'
+        key = 'ENTER-GOOGLE-API-KEY-HERE'
 
         facilities = Facility.objects.all()
         for facility in facilities:
